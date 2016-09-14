@@ -1,4 +1,4 @@
-# flow_rider
+# flow rider
 # Copyright 2016 Thomas E. Barchyn
 # Contact: Thomas E. Barchyn [tbarchyn@gmail.com]
 
@@ -22,20 +22,19 @@
 class params:
     def __init__ (self):
         '''
-        Constructor initializes parameters for the flow rider
+        constructor initializes parameters for the flow rider
         '''
+        # default filenames for flow rider states
+        states_file = 'flow_rider_states.csv'
+        intersections_file = 'flow_rider_intersections.csv'
         
+        
+        # vehicle limits
+        self.min_fluid_vel = 0.0                # minimum acceptable velocity through fluid
+        self.max_fluid_vel = 100.0              # maxumum acceptable velocity through fluid
         
         
         return
         
-    def validate_state (self):
-        '''
-        method to validate a given state estimate
-        '''
-        
-        
-        return (state)
-
 
 
