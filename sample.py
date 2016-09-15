@@ -26,6 +26,10 @@ if __name__ == '__main__':
     fl.states.read_states ('../df.csv')
     fl.intersections.update (fl.states.df)
     fl.intersections.write_intersections('../oput.csv')
-    print ('done')
+    flow_x_mean, flow_y_mean, flow_az, flow_vel = fl.get_mean_flow()
+    print ('flow mean x ' + str(flow_x_mean))
+    print ('flow mean y ' + str(flow_y_mean))
+    print ('flow az ' + str(flow_az))
+    print ('flow vel ' + str(flow_vel))
 
 

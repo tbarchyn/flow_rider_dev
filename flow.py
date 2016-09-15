@@ -79,6 +79,18 @@ class flow:
         
         return
 
+    def get_mean_flow (self):
+        '''
+        method to return the mean flow from the intersections dataframe
+        returns: flow_x_mean, flow_y_mean, flow_az, flow_vel
+        '''
+        flow_x_mean = np.mean (self.intersections.df['flow_x'])
+        flow_y_mean = np.mean (self.intersections.df['flow_y'])
+        flow_az = (atan2 (flow_x_mean, flow_y_mean) * 180.0 / pi) % 360.0
+        flow_vel = sqrt (flow_x_mean**2.0 + flow_y_mean**2.0)
+        return (flow_x_mean, flow_y_mean, flow_az, flow_vel)
+
+
 
 
 
