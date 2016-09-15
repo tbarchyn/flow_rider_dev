@@ -31,11 +31,6 @@ class params:
         states_file = 'flow_rider_states.csv'
         intersections_file = 'flow_rider_intersections.csv'
                 
-        # vehicle limits
-        self.min_fluid_vel = 0.0                # minimum acceptable velocity through fluid
-        self.max_fluid_vel = 100.0              # maximum acceptable velocity through fluid
-        
-        
         return
         
     def pre_validate (self, sdiff, tdiff, hdiff):
@@ -59,5 +54,33 @@ class params:
         mask = smask & tmask & hmask
         return (mask)
     
+    def post_validate (self, df):
+        '''
+        function to define post-validation checks - this removes unrealistic estimates from
+        the intersections dataframe
+        
+        df = the full intersections dataframe
+        
+        this returns a mask which is True where we should keep the intersections
+        '''
+        
+        # check the vehicle velocities to see if they are reasonable
+        min_velocity = 0.0                          # minimum vehicle velocity through the flow
+        max_velocity = 100.0                        # maximum vehicle velocity through the flow
+        h1_vel = np.array (df['h1_vel'])            # coerce to np arrays because pandas is not up to this task(!)
+        h2_vel = np.array (df['h2_vel'])
+        h1_mask = (h1_vel > min_velocity) & (h1_vel < max_velocity)
+        h2_mask = (h2_vel > min_velocity) & (h2_vel < max_velocity)
+        mask = h1_mask & h2_mask
+        return (mask)
+    
+    def calc_weights (self, df):
+        '''
+        method to calculate the static weights for each intersection
+        returns a numpy array to slot into the dataframe weights column
+        '''
+        pass
+        weights = df['weight']
+        return (weights)
 
         

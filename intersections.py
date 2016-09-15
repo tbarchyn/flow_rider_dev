@@ -35,7 +35,7 @@ class intersections:
         self.params = params
         self.columns = ('id1', 'id2', 'x', 'y', 'z', 'sdiff', 'tdiff', 'hdiff'
                         't1_angle', 't1_vel', 'h1_angle', 't2_angle', 't2_vel', 'h2_angle',
-                        'h1_vel', 'h2_vel', 'flow_x', 'flow_y')
+                        'h1_vel', 'h2_vel', 'flow_x', 'flow_y', 'weight')
         self.df = pd.DataFrame (columns = self.columns)
         return
     
@@ -46,7 +46,6 @@ class intersections:
         '''
         df = self.intersect (states)                        # run intersections
         df = self.calc_all (df)                             # calculate all intersections
-        df = df[~np.isnan(df['flow_x'])]                    # delete the unsuccessful estimates
         df = self.post_validate (df)                        # run post validation
         df = self.calc_weights (df)                         # calculate weights
         self.df = self.df.append (df, ignore_index = True)  # append to existing intersections
@@ -111,16 +110,16 @@ class intersections:
         '''
         method to calculate post validation
         '''
-        pass
-        
+        df = df[~np.isnan(df['flow_x'])]                    # delete the unsuccessful estimates
+        mask = self.params.post_validate (df)
+        df = df[mask]
         return (df)
     
     def calc_weights (self, df):
         '''
-        method to calculate weights for interpolation
+        method to calculate static weights for interpolation
         '''
-        pass
-    
+        df['weight'] = self.params.calc_weights (df)
         return (df)
     
     def calc_all (self, df):
