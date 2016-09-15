@@ -19,6 +19,9 @@
 
 # params = default parameter set for flowrider
 
+import numpy as np
+import pandas as pd
+
 class params:
     def __init__ (self):
         '''
@@ -27,14 +30,34 @@ class params:
         # default filenames for flow rider states
         states_file = 'flow_rider_states.csv'
         intersections_file = 'flow_rider_intersections.csv'
-        
-        
+                
         # vehicle limits
         self.min_fluid_vel = 0.0                # minimum acceptable velocity through fluid
-        self.max_fluid_vel = 100.0              # maxumum acceptable velocity through fluid
+        self.max_fluid_vel = 100.0              # maximum acceptable velocity through fluid
         
         
         return
         
+    def pre_validate (self, sdiff, tdiff, hdiff):
+        '''
+        function to define pre-validation checks - this must be relatively discriminatory
+        to limit the number of intersections that are calculated.
+        
+        sdiff = space difference for intersection pair (m) (numpy array)
+        tdiff = time difference for intersection pair (numpy array)
+        hdiff = heading difference for intersection pair (degrees) (numpy array)
+        
+        this returns a boolean mask which can be applied over the test intersections
+        '''
+        max_dist = 100.0
+        max_timediff = 100.0
+        min_heading_diff = 30.0
+        
+        smask = sdiff < max_dist
+        tmask = tdiff < max_timediff
+        hmask = hdiff > min_heading_diff
+        mask = smask & tmask & hmask
+        return (mask)
+    
 
-
+        

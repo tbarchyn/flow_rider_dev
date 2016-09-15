@@ -34,30 +34,90 @@ class intersections:
         states = a states object
         '''
         self.params = params
-        self.states = states              # states object
-        
-        #self.intersections = None
+        self.states = states.df              # states dataframe (we don't need the rest)
+        self.columns = ('id1', 'id2', 'x', 'y', 'z', 'sdiff', 'tdiff', 'hdiff'
+                        't1_angle', 't1_vel', 'h1_angle', 't2_angle', 't2_vel', 'h2_angle',
+                        'h1_vel', 'h2_vel', 'flow_x', 'flow_y')
+        self.df = pd.DataFrame (columns = self.columns)
         return
     
     def update (self):
         '''
         method to update intersections from state dataframe
         '''
-        df = self.subset ()
-        df = self.pre_validate (df)
-        df = self.calc (df)
+        df = self.intersect ()
+        df = self.calc_all (df)
         df = self.post_validate (df)
-        # append fresh intersections to self.intersections dataframe
+        df = self.calc_weights (df)
+        self.df = self.df.append (df, ignore_index = True)
         return
         
-    def subset (self):
-        df = None
-        return (df)
-    
-    def pre_validate (self, df):
+    def intersect (self):
+        '''
+        intersect the states and append the basic state values
+        '''
+        from_states = self.states[~self.states['done']]
+        
+        # set up a subset dataframe we will append intersections into
+        df = pd.DataFrame (columns = self.columns)
+        
+        # loop from the 'from_states' to the full states dataframe
+        for i in range (0, self.states.shape[0]):
+            # space difference between intersections
+            xdiff = from_states.iloc[i]['x'] - np.array (self.states['x'])
+            ydiff = from_states.iloc[i]['y'] - np.array (self.states['y'])
+            zdiff = from_states.iloc[i]['z'] - np.array (self.states['z'])          
+            sdiff = np.sqrt (xdiff**2.0 + ydiff**2.0 + zdiff**2.0)
+            
+            # time differences between intersections
+            tdiff = from_states.iloc[i]['time'] - np.array (self.states['time'])
+            
+            # heading differences between intersections
+            hdiff = np.absolute (from_states.iloc[i]['heading'] - np.array (self.states['heading']))
+            hdiff[hdiff > 180] = 360.0 - hdiff[hdiff > 180]
+            
+            # pre-validate the intersections with specific pre validation mask
+            mask = self.params.pre_validate (sdiff = sdiff, tdiff = tdiff, hdiff = hdiff)
+            
+            # make an add dataframe that is blank
+            add = pd.DataFrame (data = np.nan * np.zeros((mask[mask].shape[0], len(self.columns))),
+                                 columns = self.columns)
+            
+            # append the intersection data
+            add['id1'] = from_states['id'][i]
+            add['id2'] = self.states['id'][mask]
+            add['x'] =  (from_states['x'][i] + self.states['x'][mask]) / 2.0
+            add['y'] =  (from_states['y'][i] + self.states['y'][mask]) / 2.0
+            add['z'] =  (from_states['z'][i] + self.states['z'][mask]) / 2.0
+            add['sdiff'] = sdiff[mask]
+            add['tdiff'] = tdiff[mask]
+            add['hdiff'] = hdiff[mask]
+            add['t1_angle'] = from_states['track'][i]
+            add['t1_vel'] = from_states['velocity'][i]
+            add['h1_angle'] = from_states['heading'][i]
+            add['t2_angle'] = self.states['track'][mask]
+            add['t2_vel'] = self.states['velocity'][mask]
+            add['h2_angle'] = self.states['heading'][mask]
+            
+            # append to df
+            df = df.append (add, ignore_index = True)
+        
         return (df)
     
     def post_validate (self, df):
+        '''
+        method to calculate post validation
+        '''
+        pass
+        
+        return (df)
+    
+    def calc_weights (self, df):
+        '''
+        method to calculate weights for interpolation
+        '''
+        pass
+    
         return (df)
     
     def calc_all (self, df):
@@ -67,11 +127,6 @@ class intersections:
         df = a subset dataframe of intersections
         returns the dataframe with appended columns
         '''
-        df['h1_vel'] = np.nan
-        df['h2_vel'] = np.nan
-        df['flow_x'] = np.nan
-        df['flow_y'] = np.nan
-        
         for i in range (0, df.shape[0]):
             # calculate the intersection and record
             h1_vel, h2_vel, flow_x, flow_y = self.calc (df['t1_angle'][i], df['t1_vel'][i],

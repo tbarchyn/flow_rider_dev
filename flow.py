@@ -61,7 +61,7 @@ class flow:
             sys.exit ()
             
         self.params = params ()                                             # this should read in as an object
-        self.states = states (self.params)                                  # states     
+        self.states = states ()                                             # states     
         self.intersections = intersections (self.params, self.states)       # intersections
         return
         

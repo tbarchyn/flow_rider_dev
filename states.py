@@ -30,7 +30,7 @@ class states:
         constructor initializes the state dataframe
         '''
         self.frame = 0                     # a running id for state adds
-        self.columns = ('id', 'x', 'y', 'z', 'time', 'track', 'velocity', 'heading')
+        self.columns = ('id', 'x', 'y', 'z', 'time', 'track', 'velocity', 'heading', 'done')
         self.df = pd.DataFrame (columns = self.columns)
         return
     
@@ -45,10 +45,12 @@ class states:
         track = the azimuth the vehicle is going over the ground (degrees)
         velocity = the velocity the vehicle is going over the ground (m/s)
         heading = the azimuth the vehicle is pointing (degrees)
+        
+        Note: 'done' is a column to log if it has been intersected.
         '''
         frame = self.frame
         self.frame = self.frame + 1
-        add = pd.Series ((frame, x, y, z, time, track, velocity, heading), index = self.columns)
+        add = pd.Series ((frame, x, y, z, time, track, velocity, heading, False), index = self.columns)
         self.df = self.df.append (add, ignore_index = True)
         return
     
