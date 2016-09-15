@@ -51,7 +51,7 @@ class params:
         '''
         max_dist = 100.0
         max_timediff = 100.0
-        min_heading_diff = 30.0
+        min_heading_diff = 40.0
         
         smask = sdiff < max_dist
         tmask = tdiff < max_timediff

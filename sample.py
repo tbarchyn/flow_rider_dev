@@ -24,6 +24,8 @@ from flow import *
 if __name__ == '__main__':
     fl = flow ()
     fl.states.read_states ('../df.csv')
-    fl.intersections.update()
+    fl.intersections.update (fl.states.df)
+    fl.intersections.write_intersections('../oput.csv')
+    print ('done')
 
 

@@ -63,7 +63,7 @@ class states:
             self.df = pd.read_csv (states_filename)
         except:
             print ('ERROR: cannot read the states filename ' + states_filename)
-            
+
         return
     
     def write_states (self, states_filename):

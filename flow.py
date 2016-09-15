@@ -62,7 +62,7 @@ class flow:
             
         self.params = params ()                                             # this should read in as an object
         self.states = states ()                                             # states     
-        self.intersections = intersections (self.params, self.states)       # intersections
+        self.intersections = intersections (self.params)                    # intersections
         return
         
     def welcome (self, quiet):
