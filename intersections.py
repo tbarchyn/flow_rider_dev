@@ -87,20 +87,20 @@ class intersections:
                                  columns = self.columns)
 
             # append the intersection data as np arrays (pandas is incapable of R style clean insertion)
-            add['id1'] = from_states['id'][i]
-            add['id2'] = np.array (states['id'][mask])
-            add['x'] =  (from_states['x'][i] + np.array (states['x'][mask])) / 2.0
-            add['y'] =  (from_states['y'][i] + np.array (states['y'][mask])) / 2.0
-            add['z'] =  (from_states['z'][i] + np.array (states['z'][mask])) / 2.0
-            add['sdiff'] = sdiff[mask]
-            add['tdiff'] = tdiff[mask]
-            add['hdiff'] = hdiff[mask]
-            add['t1_angle'] = from_states['track'][i]
-            add['t1_vel'] = from_states['velocity'][i]
-            add['h1_angle'] = from_states['heading'][i]
-            add['t2_angle'] = np.array (states['track'][mask])
-            add['t2_vel'] = np.array (states['velocity'][mask])
-            add['h2_angle'] = np.array (states['heading'][mask])
+            add.loc[:, 'id1'] = from_states['id'][i]
+            add.loc[:, 'id2'] = np.array (states['id'][mask])
+            add.loc[:, 'x'] =  (from_states['x'][i] + np.array (states['x'][mask])) / 2.0
+            add.loc[:, 'y'] =  (from_states['y'][i] + np.array (states['y'][mask])) / 2.0
+            add.loc[:, 'z'] =  (from_states['z'][i] + np.array (states['z'][mask])) / 2.0
+            add.loc[:, 'sdiff'] = sdiff[mask]
+            add.loc[:, 'tdiff'] = tdiff[mask]
+            add.loc[:, 'hdiff'] = hdiff[mask]
+            add.loc[:, 't1_angle'] = from_states['track'][i]
+            add.loc[:, 't1_vel'] = from_states['velocity'][i]
+            add.loc[:, 'h1_angle'] = from_states['heading'][i]
+            add.loc[:, 't2_angle'] = np.array (states['track'][mask])
+            add.loc[:, 't2_vel'] = np.array (states['velocity'][mask])
+            add.loc[:, 'h2_angle'] = np.array (states['heading'][mask])
 
             # append to df
             df = df.append (add, ignore_index = True)
