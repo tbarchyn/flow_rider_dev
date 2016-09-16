@@ -60,7 +60,6 @@ class intersections:
 
         # set up a subset dataframe we will append intersections into
         df = pd.DataFrame (columns = self.columns)
-        print (str(df.shape))
         
         # loop from the 'from_states' to the full states dataframe
         for i in range (0, from_states.shape[0]):
@@ -203,7 +202,6 @@ class intersections:
         '''
         method to write the intersections to disk for post analysis
         '''
-        print (str(self.df.shape))
         self.df.to_csv (intersections_filename, index = False)
         return        
         
