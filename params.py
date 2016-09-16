@@ -80,7 +80,7 @@ class params:
         returns a numpy array to slot into the dataframe weights column
         '''
         pass
-        weights = df['weight']
+        weights = np.array (df['weight'])
         return (weights)
 
         

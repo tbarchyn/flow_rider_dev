@@ -33,7 +33,7 @@ class intersections:
         params = a parameter object
         '''
         self.params = params
-        self.columns = ('id1', 'id2', 'x', 'y', 'z', 'sdiff', 'tdiff', 'hdiff'
+        self.columns = ('id1', 'id2', 'x', 'y', 'z', 'sdiff', 'tdiff', 'hdiff',
                         't1_angle', 't1_vel', 'h1_angle', 't2_angle', 't2_vel', 'h2_angle',
                         'h1_vel', 'h2_vel', 'flow_x', 'flow_y', 'weight')
         self.df = pd.DataFrame (columns = self.columns)
@@ -60,6 +60,7 @@ class intersections:
 
         # set up a subset dataframe we will append intersections into
         df = pd.DataFrame (columns = self.columns)
+        print (str(df.shape))
         
         # loop from the 'from_states' to the full states dataframe
         for i in range (0, from_states.shape[0]):
@@ -82,24 +83,25 @@ class intersections:
             mask = mask & no_self_intersect                 # mask out the from_state by id
             
             # make an add dataframe that is blank
-            add = pd.DataFrame (data = np.nan * np.zeros((mask[mask].shape[0], len(self.columns))),
+            add_data = np.zeros((mask[mask].shape[0], len(self.columns)))
+            add = pd.DataFrame (data = np.nan * add_data,
                                  columns = self.columns)
-            
-            # append the intersection data
+
+            # append the intersection data as np arrays (pandas is incapable of R style clean insertion)
             add['id1'] = from_states['id'][i]
-            add['id2'] = states['id'][mask]
-            add['x'] =  (from_states['x'][i] + states['x'][mask]) / 2.0
-            add['y'] =  (from_states['y'][i] + states['y'][mask]) / 2.0
-            add['z'] =  (from_states['z'][i] + states['z'][mask]) / 2.0
+            add['id2'] = np.array (states['id'][mask])
+            add['x'] =  (from_states['x'][i] + np.array (states['x'][mask])) / 2.0
+            add['y'] =  (from_states['y'][i] + np.array (states['y'][mask])) / 2.0
+            add['z'] =  (from_states['z'][i] + np.array (states['z'][mask])) / 2.0
             add['sdiff'] = sdiff[mask]
             add['tdiff'] = tdiff[mask]
             add['hdiff'] = hdiff[mask]
             add['t1_angle'] = from_states['track'][i]
             add['t1_vel'] = from_states['velocity'][i]
             add['h1_angle'] = from_states['heading'][i]
-            add['t2_angle'] = states['track'][mask]
-            add['t2_vel'] = states['velocity'][mask]
-            add['h2_angle'] = states['heading'][mask]
+            add['t2_angle'] = np.array (states['track'][mask])
+            add['t2_vel'] = np.array (states['velocity'][mask])
+            add['h2_angle'] = np.array (states['heading'][mask])
 
             # append to df
             df = df.append (add, ignore_index = True)
@@ -110,7 +112,6 @@ class intersections:
         '''
         method to calculate post validation
         '''
-        df = df[~np.isnan(df['flow_x'])]                    # delete the unsuccessful estimates
         mask = self.params.post_validate (df)
         df = df[mask]
         return (df)
@@ -183,7 +184,7 @@ class intersections:
             h2_vel = x2
             flow_x = flow[0]
             flow_y = flow[1]
-                    
+            
         return (h1_vel, h2_vel, flow_x, flow_y)
     
     def read_intersections (self, intersections_filename):
@@ -202,6 +203,7 @@ class intersections:
         '''
         method to write the intersections to disk for post analysis
         '''
+        print (str(self.df.shape))
         self.df.to_csv (intersections_filename, index = False)
         return        
         
