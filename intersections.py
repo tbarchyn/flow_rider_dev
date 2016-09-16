@@ -51,18 +51,22 @@ class intersections:
         self.df = self.df.append (df, ignore_index = True)  # append to existing intersections
         return
         
-    def intersect (self, states):
+    def intersect (self, full_states):
         '''
         intersect the states and append the basic state values
-        states = a states dataframe to be intersected
+        full_states = the full dataframe of states to be intersected
         '''
-        from_states = states[~states['done']]
+        from_states = full_states[~full_states['done']]
 
         # set up a subset dataframe we will append intersections into
         df = pd.DataFrame (columns = self.columns)
         
         # loop from the 'from_states' to the full states dataframe
         for i in range (0, from_states.shape[0]):
+            lead_index = from_states.index[i]           # get the index here
+            states = from_states.loc[0:lead_index, :]   # cut the full states down to only
+                                                        # include a portion of the states
+            
             # space difference between intersections
             xdiff = from_states.iloc[i]['x'] - np.array (states['x'])
             ydiff = from_states.iloc[i]['y'] - np.array (states['y'])
