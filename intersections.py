@@ -123,7 +123,7 @@ class intersections:
         '''
         method to calculate static weights for interpolation
         '''
-        df['weight'] = self.params.calc_weights (df)
+        df.loc[:, 'weight'] = self.params.calc_weights (df)
         return (df)
     
     def calc_all (self, df):
