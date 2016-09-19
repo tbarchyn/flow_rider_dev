@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import gdal
 import osr
 import numpy as np
@@ -97,6 +98,23 @@ class ref_raster:
         d.ras[:,:] = np.nan
         return d
     
+    def print_state (self):
+        '''
+        utility method to print the state of the raster
+        '''
+        print ('ref raster state report')
+        print ('prototype filename: ' + str(self.prototype_filename))
+        print ('originX: ' + str(self.originX))
+        print ('originY: ' + str(self.originY))
+        print ('cell_Width: ' + str(self.cell_Width))
+        print ('cell_Height: ' + str(self.cell_Height))
+        print ('ncols: ' + str(self.ncols))
+        print ('nrows: ' + str(self.nrows))
+        print ('ras minimum: ' + str(self.ras.min()))
+        print ('ras maximum: ' + str(self.ras.max()))
+
+        return
+    
     def read_raster (self, filename):
         """
         method to read a gdal raster and return band 1 as a np array
@@ -142,7 +160,7 @@ class ref_raster:
             cell_Height = self.cell_Height
             ncols = self.ncols
             nrows = self.nrows
-            
+        
         # create driver
         driver = gdal.GetDriverByName('GTiff')
         outRaster = driver.Create (filename, ncols, nrows, 1, gdal.GDT_Float32)
