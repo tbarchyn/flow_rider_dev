@@ -26,16 +26,16 @@ import copy
 class ref_raster:
     """
     Referenced raster class. This simply includes lookups for the cell centers to enable
-    straightforward lookups of the real space location.
+    straightforward lookups of the real space location for custom interpolation.
     """
-    def __init__ (self, filename = None, originX = None, originY = None, cell_Width = None,
+    def __init__ (self, prototype_filename = None, originX = None, originY = None, cell_Width = None,
                   cell_Height = None, ncols = None, nrows = None):
         """
         Constructor requires either a prototype filename, or the specifications to create
         a blank raster full of np.nans. Note that presently a prototype raster is still
         required to get projectio
         
-        filename = the filename to read raster values from
+        prototype_filename = the filename to read raster values from
         originX = the X origin location (m)
         originY = the Y origin location (m)
         cell_Width = the width of cells (m)
@@ -43,7 +43,8 @@ class ref_raster:
         ncols = the number of columns
         nrows = the number of rows
         """
-        if filename is None:
+        self.prototype_filename = prototype_filename
+        if self.prototype_filename is None:
             self.originX = originX
             self.originY = originY
             self.cell_Width = cell_Width
@@ -52,12 +53,11 @@ class ref_raster:
             self.nrows = nrows
             read_existing_raster = False
         else:    
-            self.prototype_filename = filename
             read_existing_raster = True
         
         if read_existing_raster:
             try:
-                self.ras = self.read_GDAL_raster (self.prototype_filename)      # read the raster
+                self.ras = self.read_raster (self.prototype_filename)      # read the raster
                 raster = gdal.Open (self.prototype_filename)
                 geotransform = raster.GetGeoTransform()
                 self.originX = geotransform[0]
@@ -77,11 +77,11 @@ class ref_raster:
         # calculate the indices
         self.x_index = np.zeros (self.ncols)
         for i in range(0, self.ncols):
-            self.x_index[i] = (i * cell_Width) + originX + (cell_Width / 2.0)
+            self.x_index[i] = (i * self.cell_Width) + self.originX + (self.cell_Width / 2.0)
 
         self.y_index = np.zeros (self.nrows)
         for j in range(0, self.nrows):
-            self.y_index[j] = (j * cell_Height) + originY + (cell_Height / 2.0)
+            self.y_index[j] = (j * self.cell_Height) + self.originY + (self.cell_Height / 2.0)
 
         return
     
@@ -97,7 +97,7 @@ class ref_raster:
         d.ras[:,:] = np.nan
         return d
     
-    def read_GDAL_raster (self, filename):
+    def read_raster (self, filename):
         """
         method to read a gdal raster and return band 1 as a np array
         
@@ -110,15 +110,13 @@ class ref_raster:
         x [x == nodata_val] = np.nan             # set missing data properly
         return (x)
     
-    def write_tiff (self, filename, prototype_filename = None,
-                               nan_val = None, proj_string = None):
+    def write_tiff (self, filename, prototype_filename = None, proj_string = None):
         """
         Write a tiff to disk, if a proj_string and nan value is supplied, use those
         instead of a prototype filename. It is easier to use a prototype raster.
 
         filename = the filename to write
         prototype_filename = the prototype filename (correctly projected)
-        nan_val = optional value for nan cells
         proj_string = projection string, if none, there is no projection assigned
         """
         if prototype_filename is None:
@@ -158,7 +156,7 @@ class ref_raster:
         if use_prototype:
             nodata_flag = raster.GetRasterBand(1).GetNoDataValue()  # get the original value
         else:
-            nodata_flag = nan_val
+            nodata_flag = -9999.0                               # use hardcoded nan value
         x [np.isnan(x)] = nodata_flag                           # assign it to the array
         outband.SetNoDataValue (nodata_flag)                    # set it in the output band
         
