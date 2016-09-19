@@ -37,7 +37,8 @@ class params:
                                                                 # is provided
         self.default_assimilations_spacepad = 1.0               # default pad in space outside of states
         self.default_grid_size = 10                             # default grid size
-        self.k_nearest = 20                                     # get k nearest points for assimilations
+        self.k_nearest = 100                                    # get k nearest points for assimilations
+        self.distance_exponent = 1.0                            # distance weighting = 1/dist^x, this is x
         
         # default names for writing assimilation rasters
         self.assimilation_flow_x_mean_name = 'flow_x_mean.tif'
@@ -100,7 +101,7 @@ class params:
         '''
         pass
         weights = np.array (df['weight'])
-        
+        weights[:] = 1.0
         #space_zero_weight = 100.0
         #space
         

@@ -19,6 +19,7 @@
 
 # purpose: when you are riding the flow and you gotta know . . .
 
+from math import *
 import numpy as np
 import pandas as pd
 from gdal_raster_utils import *
@@ -75,9 +76,9 @@ class assimilations:
         intersections = supplied intersections dataframe
         '''
         # get relevant variables as np arrays
-        flow_x = np.array (intersections['flow_x'])
-        flow_y = np.array (intersections['flow_y'])
-        weight = np.array (intersections['weight'])
+        flow_x_all = np.array (intersections['flow_x'])
+        flow_y_all = np.array (intersections['flow_y'])
+        int_weight_full = np.array (intersections['weight'])
                 
         # create KDTree for subsetting to neighbors
         locs = np.array (zip (intersections['x'], intersections['y']))
@@ -87,12 +88,21 @@ class assimilations:
             for j in range (0, self.flow_x_mean.ncols):
                 
                 # query the tree to get nearest points
-                loc = np.array ([self.flow_x_mean.y_index[i], self.flow_x_mean.x_index[j]])
+                loc = np.array ([self.flow_x_mean.x_index[j], self.flow_x_mean.y_index[i]])
                 dists, indices = tree.query (loc, k = self.params.k_nearest, eps = 0.0)
                 dists = dists [~np.isinf (dists)]              # tree returns inf if more k neighbors requested
                 indices = indices [~np.isinf (dists)]          # than exist, this cuts the number down
                 
+                # cut down our variables
+                flow_x = flow_x_all[indices]
+                flow_y = flow_y_all[indices]
+                int_weight = int_weight_full[indices]
+                
                 # calculate weighted averages
+                dist_weight = 1.0 / (dists**self.params.distance_exponent)
+                weight = dist_weight * int_weight
+                
+                # run calculations
                 flow_x_average = np.average (a = flow_x, weights = weight)
                 flow_y_average = np.average (a = flow_y, weights = weight)
                 self.flow_x_mean.ras[i, j] = flow_x_average
@@ -104,7 +114,7 @@ class assimilations:
                 
         # compute convenience vectors
         self.flow_vel.ras = np.sqrt (self.flow_x_mean.ras**2.0 + self.flow_y_mean.ras**2.0)
-        self.flow_az.ras = np.arctan2 (self.flow_x_mean.ras, self.flow_y_mean.ras)
+        self.flow_az.ras = np.arctan2 (self.flow_x_mean.ras, self.flow_y_mean.ras) * 180 / pi
         self.flow_az.ras = self.flow_az.ras % 360.0
         return
     
