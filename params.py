@@ -87,13 +87,16 @@ class params:
         method to calculate the static weights for each intersection
         returns a numpy array to slot into the dataframe weights column
         '''
-        space_zero_weight = 100.0
-        space
+        pass
+        weights = np.array (df['weight'])
         
-        sdiff_weight = 
-        tdiff_weight =
-        hdiff_weight = 
-        weights = sdiff_weight * tdiff_weight * hdiff_weight
+        #space_zero_weight = 100.0
+        #space
+        
+        #sdiff_weight = 
+        #tdiff_weight =
+        #hdiff_weight = 
+        #weights = sdiff_weight * tdiff_weight * hdiff_weight
         return (weights)
 
         

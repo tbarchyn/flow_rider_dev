@@ -22,8 +22,6 @@
 import numpy as np
 import pandas as pd
 from gdal_raster_utils import *
-from sklearn.grid_search import GridSearchCV
-from pandas.core.frame import DataFrame
 
 class assimilations:
     '''
@@ -38,7 +36,7 @@ class assimilations:
         self.assimilation_bounds_set = False            # flag if assimilation bounds fixed
         return
     
-    def initialize (self, prototype_filename, originX = None, originY = None, cell_Width = None,
+    def initialize (self, prototype_filename = None, originX = None, originY = None, cell_Width = None,
                   cell_Height = None, ncols = None, nrows = None):
         '''
         method to initialize rasters with either a prototype file, or pre-defined bounds
@@ -51,21 +49,21 @@ class assimilations:
         ncols = the number of columns
         nrows = the number of rows
         '''
-        self.flow_x_mean = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_x_mean = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_y_mean = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_y_mean = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_x_sd = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_x_sd = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_y_sd = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_y_sd = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_x_med = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_x_med = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_y_med = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_y_med = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_vel = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_vel = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
-        self.flow_az = ref_raster (filename = prototype_filename, originX = originX, originY = originY,
+        self.flow_az = ref_raster (prototype_filename = prototype_filename, originX = originX, originY = originY,
                                        cell_Width = cell_Width, cell_Height = cell_Height, ncols = ncols, nrows = nrows)
         self.assimilation_bounds_set = True
         return
@@ -76,5 +74,6 @@ class assimilations:
         intersections = supplied intersections dataframe
         '''
         pass
+        print ('assimilations go here')
         return
     

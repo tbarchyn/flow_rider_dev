@@ -25,10 +25,11 @@ if __name__ == '__main__':
     fl = flow ()
     
     # read states, run intersections, and calc global mean
-    fl.states.read_states ('../df.csv')
+    #fl.states.read_states ('../df.csv')
+    fl.states.read_states ('../test/raw_pts_fakedata.csv')
     fl.intersections.update (fl.states.df)
     fl.intersections.write_intersections ('../oput.csv')
-    flow_x_mean, flow_y_mean, flow_az, flow_vel = fl.get_mean_flow ()
+    flow_x_mean, flow_y_mean, flow_az, flow_vel = fl.calc_global_mean_flow ()
     print ('flow mean x ' + str(flow_x_mean))
     print ('flow mean y ' + str(flow_y_mean))
     print ('flow az ' + str(flow_az))
@@ -36,6 +37,9 @@ if __name__ == '__main__':
 
     # assimilate to a grid
     print ('performing assimilations')
-    fl.assimilations.assimilate ()
+    fl.assimilate ()
+    fl.assimilations.flow_x_mean.ras[:,:] = 12.0
+    fl.assimilations.flow_x_mean.print_state()
+    fl.assimilations.flow_x_mean.write_tiff ('../test/flow_x_mean.tif')
 
 

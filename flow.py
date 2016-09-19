@@ -81,7 +81,7 @@ class flow:
         
         return
 
-    def get_mean_flow (self):
+    def calc_global_mean_flow (self):
         '''
         method to return the mean flow from the intersections dataframe
         returns: flow_x_mean, flow_y_mean, flow_az, flow_vel
@@ -100,12 +100,12 @@ class flow:
         # check to see if we have assimilation grids set up
         if prototype_filename is None:
             # ok, no prototype supplied, estimate the bounds from the states dataframe
-            originX = np.minimum (self.states.df['x']) - self.params.default_assimilations_spacepad
-            originY = np.minimum (self.states.df['y']) - self.params.default_assimilations_spacepad
-            cell_Width = ((np.maximum (self.states.df['x']) + self.params.default_assimilations_spacepad) -
+            originX = np.array (self.states.df['x']).min() - self.params.default_assimilations_spacepad
+            originY = np.array (self.states.df['y']).min() - self.params.default_assimilations_spacepad
+            cell_Width = ((np.array (self.states.df['x']).max() + self.params.default_assimilations_spacepad) -
                             originX) / self.params.default_grid_size
-            cell_Height = ((np.maximum (self.states.df['y']) + self.params.default_assimilations_spacepad) -
-                            originX) / self.params.default_grid_size
+            cell_Height = ((np.array (self.states.df['y']).max() + self.params.default_assimilations_spacepad) -
+                            originY) / self.params.default_grid_size
             ncols = self.params.default_grid_size
             nrows = self.params.default_grid_size
             
