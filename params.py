@@ -27,9 +27,16 @@ class params:
         '''
         constructor initializes parameters for the flow rider
         '''
-        # default filenames for flow rider states
-        states_file = 'flow_rider_states.csv'
-        intersections_file = 'flow_rider_intersections.csv'
+        # default filenames for saving the state
+        self.states_filename = 'flow_rider_states.csv'
+        self.intersections_filename = 'flow_rider_intersections.csv'
+
+        self.set_assimilation_bounds_dynamically = True         # set the assimilation bounds every
+                                                                # assimilate call with the dimensions
+                                                                # of the states . . if no prototype
+                                                                # is provided
+        self.default_assimilations_spacepad = 1.0               # default pad in space outside of states
+        self.default_grid_size = 10                             # default grid size
                 
         return
         
@@ -72,6 +79,7 @@ class params:
         h1_mask = (h1_vel > min_velocity) & (h1_vel < max_velocity)
         h2_mask = (h2_vel > min_velocity) & (h2_vel < max_velocity)
         mask = h1_mask & h2_mask
+        
         return (mask)
     
     def calc_weights (self, df):
@@ -79,8 +87,13 @@ class params:
         method to calculate the static weights for each intersection
         returns a numpy array to slot into the dataframe weights column
         '''
-        pass
-        weights = np.array (df['weight'])
+        space_zero_weight = 100.0
+        space
+        
+        sdiff_weight = 
+        tdiff_weight =
+        hdiff_weight = 
+        weights = sdiff_weight * tdiff_weight * hdiff_weight
         return (weights)
 
         

@@ -34,6 +34,7 @@ import pandas as pd
 from intersections import *
 from states import *
 from params import *
+from assimilations import *
 
 class flow:
     '''
@@ -63,6 +64,7 @@ class flow:
         self.params = params ()                                             # this should read in as an object
         self.states = states ()                                             # states     
         self.intersections = intersections (self.params)                    # intersections
+        self.assimilations = assimilations (self.params)
         return
         
     def welcome (self, quiet):
@@ -90,10 +92,56 @@ class flow:
         flow_vel = sqrt (flow_x_mean**2.0 + flow_y_mean**2.0)
         return (flow_x_mean, flow_y_mean, flow_az, flow_vel)
 
-
-
-
-
-
+    def assimilate (self, prototype_filename = None):
+        '''
+        method to run assimilations
+        prototype_filename = this is a raster to copy that is projected and has pre-defined extent
+        '''
+        # check to see if we have assimilation grids set up
+        if prototype_filename is None:
+            # ok, no prototype supplied, estimate the bounds from the states dataframe
+            originX = np.minimum (self.states.df['x']) - self.params.default_assimilations_spacepad
+            originY = np.minimum (self.states.df['y']) - self.params.default_assimilations_spacepad
+            cell_Width = ((np.maximum (self.states.df['x']) + self.params.default_assimilations_spacepad) -
+                            originX) / self.params.default_grid_size
+            cell_Height = ((np.maximum (self.states.df['y']) + self.params.default_assimilations_spacepad) -
+                            originX) / self.params.default_grid_size
+            ncols = self.params.default_grid_size
+            nrows = self.params.default_grid_size
+            
+            # check to see if we are setting bounds every assimilate call
+            if self.params.set_assimilation_bounds_dynamically:
+                # re-initialize with new dimensions from states
+                self.assimilations.initialize (originX = originX, originY = originY, cell_Width = cell_Width,
+                                                cell_Height = cell_Height, ncols = ncols, nrows = nrows)
+            else:
+                if not self.assimilations.assimilation_bounds_set:
+                    # do the one-time initialization
+                    self.assimilations.initialize (originX = originX, originY = originY, cell_Width = cell_Width,
+                                                cell_Height = cell_Height, ncols = ncols, nrows = nrows)
+        else:
+            if not self.assimilations.assimilation_bounds_set:
+                # initialize if we haven't yet
+                self.assimilations.initialize (prototype_filename = prototype_filename)
+        
+        # and . . run the assimilations
+        self.assimilations.assimilate (self.intersections.df)
+        return
+    
+    def write (self):
+        '''
+        method to save everything to default filenames as supplied in the params file
+        '''
+        self.states.write_states (self.params.states_filename)
+        self.intersections.write_intersections (self.params.intersections_file)
+        return
+    
+    def read (self):
+        '''
+        method to read everything from the default filenames as supplied in the params file
+        '''
+        self.states.read_states (self.params.states_filename)
+        self.intersections.read_intersections (self.params.intersections_file)
+        return
 
 
