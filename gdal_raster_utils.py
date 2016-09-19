@@ -76,13 +76,15 @@ class ref_raster:
                 print ('ERROR: raster creation error')
         
         # calculate the indices
-        self.x_index = np.zeros (self.ncols)
+        self.x_index = np.zeros (self.ncols) * np.nan
         for i in range(0, self.ncols):
             self.x_index[i] = (i * self.cell_Width) + self.originX + (self.cell_Width / 2.0)
 
-        self.y_index = np.zeros (self.nrows)
+        self.y_index = np.zeros (self.nrows) * np.nan
         for j in range(0, self.nrows):
-            self.y_index[j] = (j * self.cell_Height) + self.originY + (self.cell_Height / 2.0)
+            # reverse index for rows, so lookups can be more natural
+            ind = self.nrows - j - 1
+            self.y_index[ind] = (j * self.cell_Height) + self.originY + (self.cell_Height / 2.0)
 
         return
     
