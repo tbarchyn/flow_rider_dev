@@ -37,9 +37,9 @@ if __name__ == '__main__':
 
     # assimilate to a grid
     print ('performing assimilations')
-    fl.assimilate ()
-    fl.assimilations.flow_x_mean.ras[:,:] = 12.0
-    fl.assimilations.flow_x_mean.print_state()
-    fl.assimilations.flow_x_mean.write_tiff ('../test/flow_x_mean.tif')
+    fl.assimilate (prototype_filename = '../test/gap_proto_sm.tif')
+    fl.write_assimilations (folder = '../test/')
+    print ('complete')
+
 
 

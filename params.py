@@ -37,7 +37,18 @@ class params:
                                                                 # is provided
         self.default_assimilations_spacepad = 1.0               # default pad in space outside of states
         self.default_grid_size = 10                             # default grid size
-                
+        self.k_nearest = 20                                     # get k nearest points for assimilations
+        
+        # default names for writing assimilation rasters
+        self.assimilation_flow_x_mean_name = 'flow_x_mean.tif'
+        self.assimilation_flow_y_mean_name = 'flow_y_mean.tif'
+        self.assimilation_flow_x_sd_name = 'flow_x_sd.tif'
+        self.assimilation_flow_y_sd_name = 'flow_y_sd.tif'
+        self.assimilation_flow_x_med_name = 'flow_x_med.tif'
+        self.assimilation_flow_y_med_name = 'flow_y_med.tif'
+        self.assimilation_flow_vel_name = 'flow_vel.tif'
+        self.assimilation_flow_az = 'flow_az.tif'
+
         return
         
     def pre_validate (self, sdiff, tdiff, hdiff):

@@ -26,7 +26,7 @@
 # track is the direction the vehicle is going over the ground
 # velocity is the speed the vehicle is going over the ground (towards track direction)
 
-import sys
+import os
 from math import *
 import numpy as np
 import pandas as pd
@@ -143,5 +143,27 @@ class flow:
         self.states.read_states (self.params.states_filename)
         self.intersections.read_intersections (self.params.intersections_file)
         return
+
+    def write_assimilations (self, folder = None):
+        '''
+        method to write assimilations to disk in a folder
+        folder = assigned folder to dump tiffs (optional)
+        '''
+        original_dir = os.getcwd ()
+        if not folder is None:
+            os.chdir (folder)
+        self.assimilations.flow_x_mean.write_tiff (self.params.assimilation_flow_x_mean_name)
+        self.assimilations.flow_y_mean.write_tiff (self.params.assimilation_flow_y_mean_name)
+        self.assimilations.flow_x_sd.write_tiff (self.params.assimilation_flow_x_sd_name)
+        self.assimilations.flow_y_sd.write_tiff (self.params.assimilation_flow_y_sd_name)
+        self.assimilations.flow_x_med.write_tiff (self.params.assimilation_flow_x_med_name)
+        self.assimilations.flow_y_med.write_tiff (self.params.assimilation_flow_y_med_name)
+        self.assimilations.flow_vel.write_tiff (self.params.assimilation_flow_vel_name)
+        self.assimilations.flow_az.write_tiff (self.params.assimilation_flow_az)
+        
+        # back to original directory
+        os.chdir (original_dir)
+        return
+
 
 
