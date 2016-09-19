@@ -37,7 +37,7 @@ class ref_raster:
         
         filename = the filename to read raster values from
         originX = the X origin location (m)
-        originY = the Y origin locaiton (m)
+        originY = the Y origin location (m)
         cell_Width = the width of cells (m)
         cell_Height = the height of cells (m)
         ncols = the number of columns
@@ -119,7 +119,7 @@ class ref_raster:
         filename = the filename to write
         prototype_filename = the prototype filename (correctly projected)
         nan_val = optional value for nan cells
-        proj_string = projection 
+        proj_string = projection string, if none, there is no projection assigned
         """
         if prototype_filename is None:
             if self.prototype_filename is None:
@@ -162,14 +162,17 @@ class ref_raster:
         x [np.isnan(x)] = nodata_flag                           # assign it to the array
         outband.SetNoDataValue (nodata_flag)                    # set it in the output band
         
-        # write array
+        # write array and set projection (if projection supplied)
         outband.WriteArray (x)
         outRasterSRS = osr.SpatialReference ()
         if use_prototype:
             outRasterSRS.ImportFromWkt (raster.GetProjectionRef())
+            outRaster.SetProjection (outRasterSRS.ExportToWkt())
         else:
-            outRasterSRS.ImportFromWkt (proj_string)
-        outRaster.SetProjection (outRasterSRS.ExportToWkt())
+            if not proj_string is None:
+                outRasterSRS.ImportFromWkt (proj_string)
+                outRaster.SetProjection (outRasterSRS.ExportToWkt())
+        
         outband.FlushCache ()
         return
     
