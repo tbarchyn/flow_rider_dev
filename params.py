@@ -63,9 +63,9 @@ class params:
         
         this returns a boolean mask which can be applied over the test intersections
         '''
-        max_dist = 100.0
-        max_timediff = 100.0
-        min_heading_diff = 40.0
+        max_dist = 50.0
+        max_timediff = 10000.0
+        min_heading_diff = 10.0
         
         smask = sdiff < max_dist
         tmask = tdiff < max_timediff
@@ -96,19 +96,38 @@ class params:
     
     def calc_weights (self, df):
         '''
-        method to calculate the static weights for each intersection
+        method to calculate the static weights for each intersection. This is the primary assignment
+        of quality, so this really needs to be solid.
+        
+        df = the full intersections dataframe
         returns a numpy array to slot into the dataframe weights column
         '''
-        pass
+        # make local numpy arrays
         weights = np.array (df['weight'])
-        weights[:] = 1.0
-        #space_zero_weight = 100.0
-        #space
+        sdiff = np.array (df['sdiff'])
+        tdiff = np.array (df['tdiff'])
+        hdiff = np.array (df['hdiff'])
+
+        # space diff weight (linear model from 0 to a zero weight, where the weight is set to 0)
+        space_zero = 50.0                # this is whatever units space is in
+        sdiff_weight = 1.0 - (sdiff / space_zero)
+        sdiff_weight[sdiff_weight < 0.0] = 0.0
         
-        #sdiff_weight = 
-        #tdiff_weight =
-        #hdiff_weight = 
-        #weights = sdiff_weight * tdiff_weight * hdiff_weight
+        # time diff weight
+        time_zero = 10000.0               # this is whatever units time are in
+        tdiff_weight = 1.0 - (tdiff / time_zero)
+        tdiff_weight[tdiff_weight < 0.0] = 0.0
+        
+        # heading diff weight
+        heading_zero = 80.0               # this is in distance from 90 degrees
+        hdiff_weight = 1.0 - (np.absolute (hdiff - 90.0) / heading_zero)
+        hdiff_weight[hdiff_weight < 0.0] = 0.0
+        
+        # bring together the weights, then normalize to 3.0 as max possible
+        # do not normalize to this weights dataframe as this could be slotted into
+        # a larger intersections dataframe which is weighted differently.
+        weights = sdiff_weight + tdiff_weight + hdiff_weight
+        weights = weights / 3.0
         return (weights)
 
         
