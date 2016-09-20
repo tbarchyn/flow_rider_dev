@@ -41,11 +41,3 @@ if __name__ == '__main__':
     fl.write_assimilations (folder = '../test/')
     print ('assimilations complete')
 
-    # try a sequential add
-    fl.states.write_states ('../states_writeout.csv')
-    
-    fl.add_state (x = 0, y = 0, z = 0, time = 0, track = 0, velocity = 0, heading = 0)
-    fl.states.write_states ('../states_writeout2.csv')
-    fl.intersections.write_intersections ('../intersections_writeout2.csv')
-    
-

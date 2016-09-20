@@ -38,7 +38,7 @@ from assimilations import *
 
 class flow:
     '''
-    The flow class contains the flow assimilations
+    This is the lead import for flow_rider
     '''
     def __init__ (self, params_filename = None, quiet = False):
         '''
