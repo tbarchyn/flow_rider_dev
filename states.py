@@ -46,12 +46,21 @@ class states:
         velocity = the velocity the vehicle is going over the ground (m/s)
         heading = the azimuth the vehicle is pointing (degrees)
         
-        Note: 'done' is a column to log if it has been intersected.
+        Note: 'done' is a column to log if it has been intersected, this is set to 0.0 (not done),
+              or to 1.0 (done). Pandas dataframes are not capable enough to reliably handle a boolean
+              column.
         '''
         frame = self.frame
         self.frame = self.frame + 1
-        add = pd.Series ((frame, x, y, z, time, track, velocity, heading, False), index = self.columns)
+        add = pd.Series ((frame, x, y, z, time, track, velocity, heading, 0.0), index = self.columns)
         self.df = self.df.append (add, ignore_index = True)
+        return
+    
+    def done_all_callback (self):
+        '''
+        callback method to set all the done flags to 'done', this is called by intersection code
+        '''
+        self.df['done'] = 1.0
         return
     
     def read_states (self, states_filename):

@@ -2,7 +2,7 @@
 # Copyright 2016 Thomas E. Barchyn
 # Contact: Thomas E. Barchyn [tbarchyn@gmail.com]
 
-# This program is free software: you can redistribute it and/or modify
+# Thisf program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
@@ -39,7 +39,13 @@ if __name__ == '__main__':
     print ('performing assimilations')
     fl.assimilate (prototype_filename = '../test/gap_proto_sm.tif')
     fl.write_assimilations (folder = '../test/')
-    print ('complete')
+    print ('assimilations complete')
 
-
+    # try a sequential add
+    fl.states.write_states ('../states_writeout.csv')
+    
+    fl.add_state (x = 0, y = 0, z = 0, time = 0, track = 0, velocity = 0, heading = 0)
+    fl.states.write_states ('../states_writeout2.csv')
+    fl.intersections.write_intersections ('../intersections_writeout2.csv')
+    
 

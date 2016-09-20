@@ -27,16 +27,18 @@ class intersections:
     '''
     this class manages intersection storage, calculation, and validation
     '''
-    def __init__(self, params):
+    def __init__(self, params, done_states_callback):
         '''
         constructor initializes the intersections dataframe
         params = a parameter object
+        done_states_callback = callback to set all states to 'done'
         '''
         self.params = params
         self.columns = ('id1', 'id2', 'x', 'y', 'z', 'sdiff', 'tdiff', 'hdiff',
                         't1_angle', 't1_vel', 'h1_angle', 't2_angle', 't2_vel', 'h2_angle',
                         'h1_vel', 'h2_vel', 'flow_x', 'flow_y', 'weight')
         self.df = pd.DataFrame (columns = self.columns)
+        self.done_states_callback = done_states_callback
         return
     
     def update (self, states):
@@ -49,6 +51,7 @@ class intersections:
         df = self.post_validate (df)                        # run post validation
         df = self.calc_weights (df)                         # calculate weights
         self.df = self.df.append (df, ignore_index = True)  # append to existing intersections
+        self.done_states_callback ()                        # call done states callback
         return
         
     def intersect (self, full_states):
@@ -56,7 +59,7 @@ class intersections:
         intersect the states and append the basic state values
         full_states = the full dataframe of states to be intersected
         '''
-        from_states = full_states[~full_states['done']]
+        from_states = full_states[full_states['done'] < 1.0]
 
         # set up a subset dataframe we will append intersections into
         df = pd.DataFrame (columns = self.columns)
@@ -64,50 +67,53 @@ class intersections:
         # loop from the 'from_states' to the full states dataframe
         for i in range (0, from_states.shape[0]):
             lead_index = from_states.index[i]           # get the index here
-            states = from_states.loc[0:lead_index, :]   # cut the full states down to only
+            states = full_states.iloc[0:lead_index, :]  # cut the full states down to only
                                                         # include a portion of the states
             
-            # space difference between intersections
-            xdiff = from_states.iloc[i]['x'] - np.array (states['x'])
-            ydiff = from_states.iloc[i]['y'] - np.array (states['y'])
-            zdiff = from_states.iloc[i]['z'] - np.array (states['z'])          
-            sdiff = np.sqrt (xdiff**2.0 + ydiff**2.0 + zdiff**2.0)
-            
-            # time differences between intersections
-            tdiff = from_states.iloc[i]['time'] - np.array (states['time'])
-            
-            # heading differences between intersections
-            hdiff = np.absolute (from_states.iloc[i]['heading'] - np.array (states['heading']))
-            hdiff[hdiff > 180] = 360.0 - hdiff[hdiff > 180]
-            
-            # pre-validate the intersections with specific pre validation mask
-            mask = self.params.pre_validate (sdiff = sdiff, tdiff = tdiff, hdiff = hdiff)
-            no_self_intersect = from_states['id'][i] != np.array (states['id'])
-            mask = mask & no_self_intersect                 # mask out the from_state by id
-            
-            # make an add dataframe that is blank
-            add_data = np.zeros((mask[mask].shape[0], len(self.columns)))
-            add = pd.DataFrame (data = np.nan * add_data,
-                                 columns = self.columns)
-
-            # append the intersection data as np arrays (pandas is incapable of R style clean insertion)
-            add.loc[:, 'id1'] = from_states['id'][i]
-            add.loc[:, 'id2'] = np.array (states['id'][mask])
-            add.loc[:, 'x'] =  (from_states['x'][i] + np.array (states['x'][mask])) / 2.0
-            add.loc[:, 'y'] =  (from_states['y'][i] + np.array (states['y'][mask])) / 2.0
-            add.loc[:, 'z'] =  (from_states['z'][i] + np.array (states['z'][mask])) / 2.0
-            add.loc[:, 'sdiff'] = sdiff[mask]
-            add.loc[:, 'tdiff'] = tdiff[mask]
-            add.loc[:, 'hdiff'] = hdiff[mask]
-            add.loc[:, 't1_angle'] = from_states['track'][i]
-            add.loc[:, 't1_vel'] = from_states['velocity'][i]
-            add.loc[:, 'h1_angle'] = from_states['heading'][i]
-            add.loc[:, 't2_angle'] = np.array (states['track'][mask])
-            add.loc[:, 't2_vel'] = np.array (states['velocity'][mask])
-            add.loc[:, 'h2_angle'] = np.array (states['heading'][mask])
-
-            # append to df
-            df = df.append (add, ignore_index = True)
+            # ensure we successfully pulled some states
+            if states.shape[0] > 0:
+                
+                # get the space difference between intersections
+                xdiff = from_states.loc[lead_index, 'x'] - np.array (states['x'])
+                ydiff = from_states.loc[lead_index, 'y'] - np.array (states['y'])
+                zdiff = from_states.loc[lead_index, 'z'] - np.array (states['z'])          
+                sdiff = np.sqrt (xdiff**2.0 + ydiff**2.0 + zdiff**2.0)
+                
+                # time differences between intersections
+                tdiff = from_states.loc[lead_index, 'time'] - np.array (states['time'])
+                
+                # heading differences between intersections
+                hdiff = np.absolute (from_states.loc[lead_index, 'heading'] - np.array (states['heading']))
+                hdiff[hdiff > 180] = 360.0 - hdiff[hdiff > 180]
+                
+                # pre-validate the intersections with specific pre validation mask
+                mask = self.params.pre_validate (sdiff = sdiff, tdiff = tdiff, hdiff = hdiff)
+                no_self_intersect = from_states.loc[lead_index, 'id'] != np.array (states['id'])
+                mask = mask & no_self_intersect                 # mask out the from_state by id
+                
+                # make an add dataframe that is blank
+                add_data = np.zeros((mask[mask].shape[0], len(self.columns)))
+                add = pd.DataFrame (data = np.nan * add_data,
+                                     columns = self.columns)
+    
+                # append the intersection data as np arrays (pandas is incapable of R style clean insertion)
+                add.loc[:, 'id1'] = from_states.loc[lead_index, 'id']
+                add.loc[:, 'id2'] = np.array (states['id'][mask])
+                add.loc[:, 'x'] =  (from_states.loc[lead_index, 'x'] + np.array (states['x'][mask])) / 2.0
+                add.loc[:, 'y'] =  (from_states.loc[lead_index, 'y'] + np.array (states['y'][mask])) / 2.0
+                add.loc[:, 'z'] =  (from_states.loc[lead_index, 'z'] + np.array (states['z'][mask])) / 2.0
+                add.loc[:, 'sdiff'] = sdiff[mask]
+                add.loc[:, 'tdiff'] = tdiff[mask]
+                add.loc[:, 'hdiff'] = hdiff[mask]
+                add.loc[:, 't1_angle'] = from_states.loc[lead_index, 'track']
+                add.loc[:, 't1_vel'] = from_states.loc[lead_index, 'velocity']
+                add.loc[:, 'h1_angle'] = from_states.loc[lead_index, 'heading']
+                add.loc[:, 't2_angle'] = np.array (states['track'][mask])
+                add.loc[:, 't2_vel'] = np.array (states['velocity'][mask])
+                add.loc[:, 'h2_angle'] = np.array (states['heading'][mask])
+    
+                # append to df
+                df = df.append (add, ignore_index = True)
         
         return (df)
     
