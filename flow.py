@@ -45,11 +45,11 @@ class flow:
         constructor
         params_filename = the filename for the parameter filename, defaults
                           to params.py (local). For every flow
-        quiet = boolean to supress some output
+        quiet = boolean to suppress some output
         '''
         self.welcome (quiet)
         
-        if params_filename is None:
+        if params_filename is None and not quiet:
             print ('WARNING: using default parameters file params.py - you should')
             print ('         customize this for your flow!')
             params_filename = 'params.py'
@@ -91,6 +91,26 @@ class flow:
         flow_az = (atan2 (flow_x_mean, flow_y_mean) * 180.0 / pi) % 360.0
         flow_vel = sqrt (flow_x_mean**2.0 + flow_y_mean**2.0)
         return (flow_x_mean, flow_y_mean, flow_az, flow_vel)
+
+    def add_state (self, x, y, z, time, track, velocity, heading):
+        '''
+        add a state to the state dataframe (this echoes states.add_state), but adds
+        a call to update the intersections.
+        
+        x = x position (m)
+        y = y position (m)
+        z = z position (m)
+        time = time
+        track = the azimuth the vehicle is going over the ground (degrees)
+        velocity = the velocity the vehicle is going over the ground (m/s)
+        heading = the azimuth the vehicle is pointing (degrees)
+        '''
+        # add a state to the states dataframe
+        self.states.add_state(x, y, z, time, track, velocity, heading)
+        
+        # intersect that state
+        self.intersections.update (self.states.df)
+        return
 
     def assimilate (self, prototype_filename = None):
         '''
