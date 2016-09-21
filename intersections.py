@@ -48,7 +48,7 @@ class intersections:
         '''
         df = self.intersect (states)                        # run intersections
         df = self.calc_all (df)                             # calculate all intersections
-        df = self.post_validate (df)                        # run post validation
+        df = self.post_validate (df, states)                # run post validation
         df = self.calc_weights (df)                         # calculate weights
         self.df = self.df.append (df, ignore_index = True)  # append to existing intersections
         self.done_states_callback ()                        # call done states callback
@@ -117,17 +117,22 @@ class intersections:
         
         return (df)
     
-    def post_validate (self, df):
+    def post_validate (self, df, states):
         '''
         method to calculate post validation
+        df = the dataframe of intersections in this add
+        states = the states dataframe
+        returns a dataframe, but masked by post_validation
         '''
-        mask = self.params.post_validate (df)
+        mask = self.params.post_validate (df, states)
         df = df[mask]
         return (df)
     
     def calc_weights (self, df):
         '''
         method to calculate static weights for interpolation
+        df = the dataframe of intersections in this add
+        returns a dataframe with weights column calculated
         '''
         df.loc[:, 'weight'] = self.params.calc_weights (df)
         return (df)
@@ -135,7 +140,6 @@ class intersections:
     def calc_all (self, df):
         '''
         method to calculate intersections and add intersections data from a subset
-        
         df = a subset dataframe of intersections
         returns the dataframe with appended columns
         '''

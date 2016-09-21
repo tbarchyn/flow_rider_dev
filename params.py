@@ -27,6 +27,10 @@ class params:
         '''
         constructor initializes parameters for the flow rider
         '''
+        # default min and max flowspeed (for compatibility)
+        self.min_flowspeed_default = 0.0
+        self.max_flowspeed_default = 100.0
+        
         # default filenames for saving the state
         self.states_filename = 'flow_rider_states.csv'
         self.intersections_filename = 'flow_rider_intersections.csv'
@@ -36,7 +40,7 @@ class params:
                                                                 # of the states . . if no prototype
                                                                 # is provided
         self.default_assimilations_spacepad = 1.0               # default pad in space outside of states
-        self.default_grid_size = 10                             # default grid size
+        self.default_grid_size = 100                            # default grid size
         self.k_nearest = 100                                    # get k nearest points for assimilations
         self.distance_exponent = 1.0                            # distance weighting = 1/dist^x, this is x
         
@@ -63,7 +67,7 @@ class params:
         
         this returns a boolean mask which can be applied over the test intersections
         '''
-        max_dist = 50.0
+        max_dist = 10.0
         max_timediff = 10000.0
         min_heading_diff = 10.0
         
@@ -73,25 +77,35 @@ class params:
         mask = smask & tmask & hmask
         return (mask)
     
-    def post_validate (self, df):
+    def post_validate (self, df, states):
         '''
         function to define post-validation checks - this removes unrealistic estimates from
         the intersections dataframe
         
         df = the full intersections dataframe
-        
+        states = the states dataframe
+         
         this returns a mask which is True where we should keep the intersections
         '''
         
         # check the vehicle velocities to see if they are reasonable
-        min_velocity = 0.0                          # minimum vehicle velocity through the flow
-        max_velocity = 100.0                        # maximum vehicle velocity through the flow
-        h1_vel = np.array (df['h1_vel'])            # coerce to np arrays because pandas is not up to this task(!)
-        h2_vel = np.array (df['h2_vel'])
-        h1_mask = (h1_vel > min_velocity) & (h1_vel < max_velocity)
-        h2_mask = (h2_vel > min_velocity) & (h2_vel < max_velocity)
-        mask = h1_mask & h2_mask
-        
+        mask = np.array (df['h1_vel']) > 0.0            # get a basic boolean mask
+        mask[:] = False                                 # and . . set it all to false
+        for i in range (0, df.shape[0]):
+            state_1_id = df.loc[i, 'id1']
+            state_2_id = df.loc[i, 'id2']
+            h1_vel = df.loc[i, 'h1_vel']
+            h2_vel = df.loc[i, 'h2_vel']
+            state_1_min_flowspeed = states.loc[states['id'] == state_1_id, states.columns == 'min_flowspeed'].iloc[0, 0]
+            state_1_max_flowspeed = states.loc[states['id'] == state_1_id, states.columns == 'max_flowspeed'].iloc[0, 0]
+            state_2_min_flowspeed = states.loc[states['id'] == state_2_id, states.columns == 'min_flowspeed'].iloc[0, 0]
+            state_2_max_flowspeed = states.loc[states['id'] == state_2_id, states.columns == 'max_flowspeed'].iloc[0, 0]
+            
+            # check to see if this intersection has reasonable estimated speeds
+            if h1_vel > state_1_min_flowspeed and h1_vel < state_1_max_flowspeed:
+                if h2_vel > state_2_min_flowspeed and h2_vel < state_2_max_flowspeed:
+                    mask[i] = True
+                    
         return (mask)
     
     def calc_weights (self, df):
@@ -109,7 +123,7 @@ class params:
         hdiff = np.array (df['hdiff'])
 
         # space diff weight (linear model from 0 to a zero weight, where the weight is set to 0)
-        space_zero = 50.0                # this is whatever units space is in
+        space_zero = 10.0                # this is whatever units space is in
         sdiff_weight = 1.0 - (sdiff / space_zero)
         sdiff_weight[sdiff_weight < 0.0] = 0.0
         

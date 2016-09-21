@@ -30,11 +30,12 @@ class states:
         constructor initializes the state dataframe
         '''
         self.frame = 0                     # a running id for state adds
-        self.columns = ('id', 'x', 'y', 'z', 'time', 'track', 'velocity', 'heading', 'done')
+        self.columns = ('id', 'x', 'y', 'z', 'time', 'track', 'velocity', 'heading', 'min_flowspeed',
+                        'max_flowspeed', 'done')
         self.df = pd.DataFrame (columns = self.columns)
         return
     
-    def add_state (self, x, y, z, time, track, velocity, heading):
+    def add_state (self, x, y, z, time, track, velocity, heading, min_flowspeed, max_flowspeed):
         '''
         add a state to the state dataframe
         
@@ -45,6 +46,8 @@ class states:
         track = the azimuth the vehicle is going over the ground (degrees)
         velocity = the velocity the vehicle is going over the ground (m/s)
         heading = the azimuth the vehicle is pointing (degrees)
+        min_flowspeed = the minimum flow speed that is realistic (m/s)
+        max_flowspeed = the maximum flow speed that is realistic (m/s)
         
         Note: 'done' is a column to log if it has been intersected, this is set to 0.0 (not done),
               or to 1.0 (done). Pandas dataframes are not capable enough to reliably handle a boolean
@@ -52,7 +55,8 @@ class states:
         '''
         frame = self.frame
         self.frame = self.frame + 1
-        add = pd.Series ((frame, x, y, z, time, track, velocity, heading, 0.0), index = self.columns)
+        add = pd.Series ((frame, x, y, z, time, track, velocity, heading, min_flowspeed,
+                          max_flowspeed, 0.0), index = self.columns)
         self.df = self.df.append (add, ignore_index = True)
         return
     
@@ -70,6 +74,14 @@ class states:
         '''
         try:
             self.df = pd.read_csv (states_filename)
+            try:
+                # see if there is a min flowspeed specified . . if not just pend in default
+                test = self.df['min_flowspeed'][0]
+            except:
+                print ('adding min and max flowspeed for compatibility with old states dataframes')
+                self.df['min_flowspeed'] = self.params.min_flowspeed_default
+                self.df['max_flowspeed'] = self.params.max_flowspeed_default
+        
         except:
             print ('ERROR: cannot read the states filename ' + states_filename)
 
