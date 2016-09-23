@@ -44,7 +44,10 @@ class flow:
         '''
         constructor
         params_filename = the filename for the parameter filename, defaults
-                          to params.py (local). For every flow
+                          to params.py (local). Wind and water are going to
+                          have different parameter files as there are very different
+                          autocorrelation scales. Likely some vehicle customization will
+                          be required also.
         quiet = boolean to suppress some output
         '''
         self.welcome (quiet)
@@ -76,7 +79,9 @@ class flow:
             print ('------------------------------------------------------------')
             print ('flow_rider_dev: when you are riding the flow and you gotta know . .')
             print ('Copyright 2016 Tom Barchyn')
+            print ('University of Calgary')
             print ('This software has no warranty whatsoever! please see licence!')
+            print ('This software is in early early beta and may contain bugs!')
             print ('------------------------------------------------------------')
         
         return
