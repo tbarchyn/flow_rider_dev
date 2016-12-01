@@ -27,6 +27,9 @@ class params:
         '''
         constructor initializes parameters for the flow rider
         '''
+        # run intersections dynamically at every add data call
+        self.calc_intersections_realtime = False
+        
         # default min and max flowspeed (for compatibility)
         self.min_flowspeed_default = 0.0
         self.max_flowspeed_default = 100.0

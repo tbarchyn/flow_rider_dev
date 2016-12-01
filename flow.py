@@ -97,7 +97,7 @@ class flow:
         flow_vel = sqrt (flow_x_mean**2.0 + flow_y_mean**2.0)
         return (flow_x_mean, flow_y_mean, flow_az, flow_vel)
 
-    def add_state (self, x, y, z, time = None, track, velocity, heading, min_flowspeed, max_flowspeed):
+    def add_state (self, x, y, z, track, velocity, heading, min_flowspeed, max_flowspeed, time = None):
         '''
         add a state to the state dataframe (this echoes states.add_state), but adds
         a call to update the intersections.
@@ -117,8 +117,10 @@ class flow:
         # add a state to the states dataframe
         self.states.add_state (x, y, z, time, track, velocity, heading, min_flowspeed, max_flowspeed)
         
-        # intersect that state
-        self.intersections.update (self.states.df)
+        # intersect that state if we are performing this realtime
+        if self.params.calc_intersections_realtime:
+            self.intersections.update (self.states.df)
+        
         return
 
     def assimilate (self, prototype_filename = None):
