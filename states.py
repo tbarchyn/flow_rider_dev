@@ -17,9 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+import os
 from math import *
 import numpy as np
 import pandas as pd
+import datetime
 
 class states:
     '''
@@ -33,6 +36,8 @@ class states:
         self.columns = ('id', 'x', 'y', 'z', 'time', 'track', 'velocity', 'heading', 'min_flowspeed',
                         'max_flowspeed', 'done')
         self.df = pd.DataFrame (columns = self.columns)
+        
+        self.start_time = datetime.datetime.now ()
         return
     
     def add_state (self, x, y, z, time, track, velocity, heading, min_flowspeed, max_flowspeed):
@@ -42,7 +47,7 @@ class states:
         x = x position (m)
         y = y position (m)
         z = z position (m)
-        time = time
+        time = time (if None, the time since init will be used)
         track = the azimuth the vehicle is going over the ground (degrees)
         velocity = the velocity the vehicle is going over the ground (m/s)
         heading = the azimuth the vehicle is pointing (degrees)
@@ -55,6 +60,12 @@ class states:
         '''
         frame = self.frame
         self.frame = self.frame + 1
+        
+        # record time difference if unsupplied
+        if time is None:
+            time_diff = datetime.datetime.now () - self.start_time
+            time = time_diff.seconds + (1e-6 * time_diff.microseconds)
+
         add = pd.Series ((frame, x, y, z, time, track, velocity, heading, min_flowspeed,
                           max_flowspeed, 0.0), index = self.columns)
         self.df = self.df.append (add, ignore_index = True)

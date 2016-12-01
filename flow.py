@@ -97,7 +97,7 @@ class flow:
         flow_vel = sqrt (flow_x_mean**2.0 + flow_y_mean**2.0)
         return (flow_x_mean, flow_y_mean, flow_az, flow_vel)
 
-    def add_state (self, x, y, z, time, track, velocity, heading, min_flowspeed, max_flowspeed):
+    def add_state (self, x, y, z, time = None, track, velocity, heading, min_flowspeed, max_flowspeed):
         '''
         add a state to the state dataframe (this echoes states.add_state), but adds
         a call to update the intersections.
@@ -105,7 +105,8 @@ class flow:
         x = x position (m)
         y = y position (m)
         z = z position (m)
-        time = time
+        time = time (optional, if not supplied the time is recorded as number of seconds since
+                     start of the experiment)
         track = the azimuth the vehicle is going over the ground (degrees)
         velocity = the velocity the vehicle is going over the ground (m/s)
         heading = the azimuth the vehicle is pointing (degrees)
@@ -114,7 +115,7 @@ class flow:
         '''
         
         # add a state to the states dataframe
-        self.states.add_state(x, y, z, time, track, velocity, heading, min_flowspeed, max_flowspeed)
+        self.states.add_state (x, y, z, time, track, velocity, heading, min_flowspeed, max_flowspeed)
         
         # intersect that state
         self.intersections.update (self.states.df)
